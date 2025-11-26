@@ -1,8 +1,14 @@
-for repo in $(curl -s --header "PRIVATE-TOKEN: $1" \
-    "https://gitlab.com/api/v4/groups/$2/projects?include_subgroups=true&page=1&per_page=100" |
-    jq -r '.[] | "\(.path_with_namespace)#\(.ssh_url_to_repo)"'); do
-    dir=$(echo $repo | cut -d "#" -f 1)
-    link=$(echo $repo | cut -d "#" -f 2)
-    mkdir -p $dir
-    git clone $link $dir
+for ((page=1; page<=15; page++)); do
+    for repo in $(curl -s --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+        "https://gitlab.com/api/v4/groups/edukita/projects?include_subgroups=true&page=$page&per_page=100" |
+        jq -r '.[] | "\(.path_with_namespace)#\(.http_url_to_repo)"'); do
+        dir=$(echo $repo | cut -d "#" -f 1)
+        link=$(echo $repo | cut -d "#" -f 2)
+            echo "===="
+            echo $dir
+            echo $link
+            mkdir -p $dir
+            git clone $link $dir
+            sleep 1
+    done
 done
